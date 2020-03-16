@@ -5,7 +5,7 @@ For now, `Array::filter` is only supported.
 
 ## How to use the custom transformer
 
-Unfortunately, TypeScript itself does not currently provide any easy way to use custom transformers (See https://github.com/Microsoft/TypeScript/issues/14419).
+Unfortunately, TypeScript itself does not currently provide any easy way to use custom transformers (See [https://github.com/Microsoft/TypeScript/issues/14419](Microsoft/TypeScript#14419)).
 The followings are the example usage of the custom transformer.
 
 See [kimamula/ts-transformer-keys](https://github.com/kimamula/ts-transformer-keys/blob/master/README.md#how-to-use-the-custom-transformer).
