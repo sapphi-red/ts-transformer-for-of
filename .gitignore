@@ -102,3 +102,11 @@ dist
 
 # TernJS port file
 .tern-port
+
+# -----
+*.js
+!/index.js
+!test/fileTransformation/*.ES5.js
+!test/fileTransformation/*.ESNext.js
+!test/compile/index.js
+/memo.txt

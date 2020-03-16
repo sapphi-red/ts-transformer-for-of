@@ -1,0 +1,31 @@
+{
+  "name": "ts-transformer-for-of",
+  "version": "0.1.0",
+  "description": "A TypeScript custom transformer which transforms multiple array methods to one for-of loop.",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "tsc",
+    "prepublishOnly": "npm test",
+    "test": "node test/compile && mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sapphi-red/ts-transformer-for-of.git"
+  },
+  "keywords": [
+    "TypeScript"
+  ],
+  "author": "sapphi-red",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sapphi-red/ts-transformer-for-of/issues"
+  },
+  "homepage": "https://github.com/sapphi-red/ts-transformer-for-of#readme",
+  "devDependencies": {
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.9.1",
+    "mocha": "^7.1.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {}
+}

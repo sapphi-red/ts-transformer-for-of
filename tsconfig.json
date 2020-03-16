@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "strict": true,
+    "noEmitOnError": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": [
+    "transformer.ts",
+    "test/compile/compile.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
