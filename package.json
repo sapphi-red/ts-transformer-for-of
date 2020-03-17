@@ -4,10 +4,10 @@
   "description": "A TypeScript custom transformer which transforms multiple array methods to one for-of loop.",
   "main": "transformer.js",
   "scripts": {
-    "prepare": "tsc",
+    "prepare": "tsc transformer.ts",
     "prepublishOnly": "npm test",
     "test": "node test/compile && mocha test",
-    "postinstall": "tsc"
+    "postinstall": "tsc transformer.ts"
   },
   "repository": {
     "type": "git",
