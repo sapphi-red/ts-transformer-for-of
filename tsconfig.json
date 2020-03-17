@@ -9,7 +9,6 @@
   },
   "include": [
     "transformer.ts",
-    "util.ts",
     "test/compile/compile.ts"
   ],
   "exclude": [
