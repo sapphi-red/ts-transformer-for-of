@@ -38,6 +38,7 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   }
   if (callback.parameters.length > 1) {
     console.log('Using index param and array param is not supported. Param length: ', callback.parameters.length)
+    return node;
   }
 
   const { hoistVariableDeclaration } = context;
