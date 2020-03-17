@@ -31,6 +31,7 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
 
   const args = node.arguments
   const callback = args[0]
+  const thisArg = args[1]
   if (!isFunction(callback)) {
     console.log('The first arg is not a function: ', method.getText())
     return node;
@@ -43,8 +44,11 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   const outputVar = ts.createTempVariable(hoistVariableDeclaration)
   const nVar = ts.createTempVariable(hoistVariableDeclaration)
   const inputParam = ts.createParameter([], [], undefined, inputVar)
+
+  const bindedCallback = thisArg ? ts.createCall(ts.createPropertyAccess(callback, 'bind'), [], [thisArg]) : callback
+
   const tmpFunction = ts.createFunctionExpression([], undefined, undefined, [], [inputParam], undefined, ts.createBlock([
-    ts.createVariableStatement([], [ts.createVariableDeclaration(filterFuncVar, undefined, callback)]),
+    ts.createVariableStatement([], [ts.createVariableDeclaration(filterFuncVar, undefined, bindedCallback)]),
     ts.createVariableStatement([], [ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
     ts.createForOf(undefined, nVar, inputVar, ts.createBlock([
       ts.createIf(ts.createLogicalNot(ts.createCall(filterFuncVar, [], [nVar])), ts.createContinue()),
