@@ -44,7 +44,7 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   const { hoistVariableDeclaration } = context;
 
   const inputVar = ts.createTempVariable(hoistVariableDeclaration)
-  const filterFuncVar = ts.createTempVariable(hoistVariableDeclaration)
+  const callbackFuncVar = ts.createTempVariable(hoistVariableDeclaration)
   const outputVar = ts.createTempVariable(hoistVariableDeclaration)
   const nVar = ts.createTempVariable(hoistVariableDeclaration)
   const inputParam = ts.createParameter([], [], undefined, inputVar)
@@ -52,10 +52,10 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   const bindedCallback = thisArg ? ts.createCall(ts.createPropertyAccess(callback, 'bind'), [], [thisArg]) : callback
 
   const tmpFunction = ts.createFunctionExpression([], undefined, undefined, [], [inputParam], undefined, ts.createBlock([
-    ts.createVariableStatement([], [ts.createVariableDeclaration(filterFuncVar, undefined, bindedCallback)]),
+    ts.createVariableStatement([], [ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
     ts.createVariableStatement([], [ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
     ts.createForOf(undefined, nVar, inputVar, ts.createBlock([
-      ts.createIf(ts.createLogicalNot(ts.createCall(filterFuncVar, [], [nVar])), ts.createContinue()),
+      ts.createIf(ts.createLogicalNot(ts.createCall(callbackFuncVar, [], [nVar])), ts.createContinue()),
       ts.createExpressionStatement(ts.createCall(ts.createPropertyAccess(outputVar, 'push'), [], [nVar]))
     ], true)),
     ts.createReturn(outputVar)
