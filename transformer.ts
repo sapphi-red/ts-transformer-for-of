@@ -34,11 +34,11 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   const callback = args[0]
   const thisArg = args[1]
   if (!isFunction(callback)) {
-    console.log('The first arg is not a function: ', methodName)
+    console.log('The first arg is not a function:', methodName)
     return node;
   }
   if (callback.parameters.filter(p => p.name.getText() !== 'this').length > 1) {
-    console.log('Using index param and array param is not supported. Param length: ', callback.parameters.length)
+    console.log('Using index param and array param is not supported. Param length:', callback.parameters.length)
     //return node;
   }
 
@@ -60,7 +60,7 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   } else if (methodName === 'forEach') {
     tmpFunction = createForEachTmpFunction({inputVar, callbackFuncVar, outputVar, nVar, inputParam}, bindedCallback)
   } else {
-    throw new Error('Transform Error: unsupported method was going to be transformed')
+    throw new Error(`Transform Error: unsupported method was going to be transformed: ${methodName}`)
   }
 
   return ts.updateCall(node, tmpFunction, [], [base])
