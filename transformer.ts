@@ -36,6 +36,9 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
     console.log('The first arg is not a function: ', method.getText())
     return node;
   }
+  if (callback.parameters.length > 1) {
+    console.log('Using index param and array param is not supported. Param length: ', callback.parameters.length)
+  }
 
   const { hoistVariableDeclaration } = context;
 
