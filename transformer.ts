@@ -39,7 +39,7 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   }
   if (callback.parameters.filter(p => p.name.getText() !== 'this').length > 1) {
     console.log('Using index param and array param is not supported. Param length:', callback.parameters.length)
-    //return node;
+    return node;
   }
 
   const { hoistVariableDeclaration } = context;
