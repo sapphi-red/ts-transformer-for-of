@@ -26,7 +26,7 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   const methodName = method.getText()
 
   if (methodName !== 'filter' && methodName !== 'map') {
-    console.log('Array::filter and Array::map is only supported', methodName)
+    console.log('Array::filter and Array::map are only supported', methodName)
     return node;
   }
 

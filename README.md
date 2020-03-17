@@ -1,7 +1,7 @@
 # ts-transformer-for-of
 A TypeScript custom transformer which transforms multiple array methods to one for-of loop.
 
-For now, `Array::filter` and `Array::map` is only supported.
+For now, `Array::filter` and `Array::map` are only supported.
 
 ## How to use the custom transformer
 
