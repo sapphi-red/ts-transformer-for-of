@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import { isArrayMethodCallExpression, isFunction, getSimpleArrayMethodExpression } from './util';
 
 export default function transformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => visitNodeAndChildren(file, program, context);
@@ -53,40 +54,4 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   ], true))
 
   return ts.updateCall(node, tmpFunction, [], [base])
-}
-
-function isArrayMethodCallExpression(node: ts.Node, typeChecker: ts.TypeChecker): node is ts.CallExpression & {expression: ts.PropertyAccessExpression} {
-  if (!ts.isCallExpression(node)) {
-    return false;
-  }
-  if (!ts.isPropertyAccessExpression(node.expression)) {
-    return false;
-  }
-
-  const propAccess = getSimpleArrayMethodExpression(node.expression)
-  const base = propAccess.expression
-  const baseType = typeChecker.getTypeAtLocation(base)
-
-  return isArray(baseType, typeChecker)
-}
-
-function getSimpleArrayMethodExpression(expression: ts.PropertyAccessExpression): ts.PropertyAccessExpression {
-  while (ts.isPropertyAccessExpression(expression.expression)) {
-    expression = expression.expression
-  }
-  return expression
-}
-
-function isArray(type: ts.Type, typeChecker: ts.TypeChecker): type is ts.TypeReference {
-  if (type.getSymbol()?.getName() !== 'Array') {
-    return false
-  }
-  if (typeChecker.getTypeArguments(type as ts.TypeReference).length !== 1) {
-    return false
-  }
-  return true
-}
-
-function isFunction(expression: ts.Expression): expression is ts.FunctionExpression | ts.ArrowFunction {
-  return ts.isArrowFunction(expression) || ts.isFunctionExpression(expression)
 }
