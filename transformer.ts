@@ -25,8 +25,8 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   const method = expression.name
   const methodName = method.getText()
 
-  if (methodName !== 'filter' && methodName !== 'map') {
-    console.log('Array::filter and Array::map are only supported', methodName)
+  if (!['filter', 'map', 'forEach'].includes(methodName)) {
+    console.log('Array::filter, Array::map and Array::forEach are only supported. Method name:', methodName)
     return node;
   }
 
@@ -57,6 +57,8 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
     tmpFunction = createFilterTmpFunction({inputVar, callbackFuncVar, outputVar, nVar, inputParam}, bindedCallback)
   } else if (methodName === 'map') {
     tmpFunction = createMapTmpFunction({inputVar, callbackFuncVar, outputVar, nVar, inputParam}, bindedCallback)
+  } else if (methodName === 'forEach') {
+    tmpFunction = createForEachTmpFunction({inputVar, callbackFuncVar, outputVar, nVar, inputParam}, bindedCallback)
   } else {
     throw new Error('Transform Error: unsupported method was going to be transformed')
   }
@@ -101,5 +103,16 @@ const createMapTmpFunction: CreateTmpFunction = ({
       ))
     ], true)),
     ts.createReturn(outputVar)
+  ], true))
+}
+
+const createForEachTmpFunction: CreateTmpFunction = ({
+  inputVar, callbackFuncVar, nVar, inputParam
+}, bindedCallback) => {
+  return ts.createFunctionExpression([], undefined, undefined, [], [inputParam], undefined, ts.createBlock([
+    ts.createVariableStatement([], [ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
+    ts.createForOf(undefined, nVar, inputVar, ts.createBlock([
+      ts.createExpressionStatement(ts.createCall(callbackFuncVar, [], [nVar]))
+    ], true))
   ], true))
 }
