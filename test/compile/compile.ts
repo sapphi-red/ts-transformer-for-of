@@ -1,5 +1,5 @@
-import * as ts from 'typescript';
-import transformer from '../../transformer';
+import * as ts from 'typescript'
+import transformer from '../../transformer'
 
 const _compile = (transformer?: (program: ts.Program) => ts.TransformerFactory<ts.SourceFile>) => {
   return (filePaths: string[], target = ts.ScriptTarget.ES5, writeFileCallback?: ts.WriteFileCallback) => {
@@ -8,15 +8,17 @@ const _compile = (transformer?: (program: ts.Program) => ts.TransformerFactory<t
       noEmitOnError: true,
       suppressImplicitAnyIndexErrors: true,
       target
-    });
-    const transformers: ts.CustomTransformers = transformer ? {
-      before: [transformer(program)],
-      after: []
-    } : {};
-    const { emitSkipped, diagnostics } = program.emit(undefined, writeFileCallback, undefined, false, transformers);
+    })
+    const transformers: ts.CustomTransformers = transformer
+      ? {
+          before: [transformer(program)],
+          after: []
+        }
+      : {}
+    const { emitSkipped, diagnostics } = program.emit(undefined, writeFileCallback, undefined, false, transformers)
 
     if (emitSkipped) {
-      throw new Error(diagnostics.map(diagnostic => diagnostic.messageText).join('\n'));
+      throw new Error(diagnostics.map(diagnostic => diagnostic.messageText).join('\n'))
     }
   }
 }

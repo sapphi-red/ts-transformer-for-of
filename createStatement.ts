@@ -1,22 +1,39 @@
-import * as ts from 'typescript';
+import * as ts from 'typescript'
 
-const createConst = (declarations: ts.VariableDeclaration[]): ts.VariableStatement => ts.createVariableStatement(undefined, ts.createVariableDeclarationList(declarations, ts.NodeFlags.Const))
+const createConst = (declarations: ts.VariableDeclaration[]): ts.VariableStatement =>
+  ts.createVariableStatement(undefined, ts.createVariableDeclarationList(declarations, ts.NodeFlags.Const))
 
 type HoistVariableDeclaration = (node: ts.Identifier) => void
 
-export const wrapWithFunc = (hoistVariableDeclaration: HoistVariableDeclaration, getStatements: (inputVar: ts.Identifier) => ts.Statement[]) => {
+export const wrapWithFunc = (
+  hoistVariableDeclaration: HoistVariableDeclaration,
+  getStatements: (inputVar: ts.Identifier) => ts.Statement[]
+) => {
   const inputVar = ts.createTempVariable(hoistVariableDeclaration)
   const inputParam = ts.createParameter([], [], undefined, inputVar)
-  return ts.createFunctionExpression([], undefined, undefined, [], [inputParam], undefined, ts.createBlock(
-    getStatements(inputVar)
-  , true))
+  return ts.createFunctionExpression(
+    [],
+    undefined,
+    undefined,
+    [],
+    [inputParam],
+    undefined,
+    ts.createBlock(getStatements(inputVar), true)
+  )
 }
 
-export const createFor = (hoistVariableDeclaration: HoistVariableDeclaration, inputVar: ts.Identifier, getStatements: (nVar: ts.Identifier) => ts.Statement[]): ts.ForStatement => {
+export const createFor = (
+  hoistVariableDeclaration: HoistVariableDeclaration,
+  inputVar: ts.Identifier,
+  getStatements: (nVar: ts.Identifier) => ts.Statement[]
+): ts.ForStatement => {
   const iVar = ts.createLoopVariable()
   const nVar = ts.createTempVariable(hoistVariableDeclaration)
   return ts.createFor(
-    ts.createVariableDeclarationList([ts.createVariableDeclaration(iVar, undefined, ts.createLiteral(0))], ts.NodeFlags.Let),
+    ts.createVariableDeclarationList(
+      [ts.createVariableDeclaration(iVar, undefined, ts.createLiteral(0))],
+      ts.NodeFlags.Let
+    ),
     ts.createLessThan(iVar, ts.createPropertyAccess(inputVar, 'length')),
     ts.createPostfixIncrement(iVar),
     ts.createBlock(
@@ -27,7 +44,10 @@ export const createFor = (hoistVariableDeclaration: HoistVariableDeclaration, in
   )
 }
 
-type CreateTmpFunction = (hoistVariableDeclaration: HoistVariableDeclaration, bindedCallback: ts.Expression) => ts.FunctionExpression
+type CreateTmpFunction = (
+  hoistVariableDeclaration: HoistVariableDeclaration,
+  bindedCallback: ts.Expression
+) => ts.FunctionExpression
 
 export const createFilterTmpFunction: CreateTmpFunction = (hoistVariableDeclaration, bindedCallback: ts.Expression) => {
   const callbackFuncVar = ts.createTempVariable(hoistVariableDeclaration)
@@ -50,11 +70,9 @@ export const createMapTmpFunction: CreateTmpFunction = (hoistVariableDeclaration
     createConst([ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
     createConst([ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
     createFor(hoistVariableDeclaration, inputVar, nVar => [
-      ts.createExpressionStatement(ts.createCall(
-        ts.createPropertyAccess(outputVar, 'push'),
-        [],
-        [ts.createCall(callbackFuncVar, [], [nVar])]
-      ))
+      ts.createExpressionStatement(
+        ts.createCall(ts.createPropertyAccess(outputVar, 'push'), [], [ts.createCall(callbackFuncVar, [], [nVar])])
+      )
     ]),
     ts.createReturn(outputVar)
   ])

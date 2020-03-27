@@ -1,11 +1,14 @@
-import * as ts from 'typescript';
+import * as ts from 'typescript'
 
-export function isArrayMethodCallExpression(node: ts.Node, typeChecker: ts.TypeChecker): node is ts.CallExpression & {expression: ts.PropertyAccessExpression} {
+export function isArrayMethodCallExpression(
+  node: ts.Node,
+  typeChecker: ts.TypeChecker
+): node is ts.CallExpression & { expression: ts.PropertyAccessExpression } {
   if (!ts.isCallExpression(node)) {
-    return false;
+    return false
   }
   if (!ts.isPropertyAccessExpression(node.expression)) {
-    return false;
+    return false
   }
 
   const propAccess = getSimpleArrayMethodExpression(node.expression)

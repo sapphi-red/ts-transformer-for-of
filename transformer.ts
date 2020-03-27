@@ -1,23 +1,39 @@
-import * as ts from 'typescript';
-import { isArrayMethodCallExpression, isFunction, getSimpleArrayMethodExpression } from './type';
-import { createFilterTmpFunction, createMapTmpFunction, createForEachTmpFunction } from './createStatement';
+import * as ts from 'typescript'
+import { isArrayMethodCallExpression, isFunction, getSimpleArrayMethodExpression } from './type'
+import { createFilterTmpFunction, createMapTmpFunction, createForEachTmpFunction } from './createStatement'
 
 export default function transformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile> {
-  return (context: ts.TransformationContext) => (file: ts.SourceFile) => visitNodeAndChildren(file, program, context);
+  return (context: ts.TransformationContext) => (file: ts.SourceFile) => visitNodeAndChildren(file, program, context)
 }
 
-function visitNodeAndChildren(node: ts.SourceFile, program: ts.Program, context: ts.TransformationContext): ts.SourceFile;
-function visitNodeAndChildren(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined;
-function visitNodeAndChildren(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined {
-  return ts.visitEachChild(visitNode(node, program, context), childNode => visitNodeAndChildren(childNode, program, context), context);
+function visitNodeAndChildren(
+  node: ts.SourceFile,
+  program: ts.Program,
+  context: ts.TransformationContext
+): ts.SourceFile
+function visitNodeAndChildren(
+  node: ts.Node,
+  program: ts.Program,
+  context: ts.TransformationContext
+): ts.Node | undefined
+function visitNodeAndChildren(
+  node: ts.Node,
+  program: ts.Program,
+  context: ts.TransformationContext
+): ts.Node | undefined {
+  return ts.visitEachChild(
+    visitNode(node, program, context),
+    childNode => visitNodeAndChildren(childNode, program, context),
+    context
+  )
 }
 
-function visitNode(node: ts.SourceFile, program: ts.Program, context: ts.TransformationContext): ts.SourceFile;
-function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined;
+function visitNode(node: ts.SourceFile, program: ts.Program, context: ts.TransformationContext): ts.SourceFile
+function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined
 function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined {
-  const typeChecker = program.getTypeChecker();
+  const typeChecker = program.getTypeChecker()
   if (!isArrayMethodCallExpression(node, typeChecker)) {
-    return node;
+    return node
   }
 
   const expression = getSimpleArrayMethodExpression(node.expression)
@@ -28,7 +44,7 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
 
   if (!['filter', 'map', 'forEach'].includes(methodName)) {
     console.log('Array::filter, Array::map and Array::forEach are only supported. Method name:', methodName)
-    return node;
+    return node
   }
 
   const args = node.arguments
@@ -36,14 +52,14 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   const thisArg = args[1]
   if (!isFunction(callback)) {
     console.log('The first arg is not a function:', methodName)
-    return node;
+    return node
   }
   if (callback.parameters.filter(p => p.name.getText() !== 'this').length > 1) {
     console.log('Using index param and array param is not supported. Param length:', callback.parameters.length)
-    return node;
+    return node
   }
 
-  const { hoistVariableDeclaration } = context;
+  const { hoistVariableDeclaration } = context
 
   const bindedCallback = thisArg ? ts.createCall(ts.createPropertyAccess(callback, 'bind'), [], [thisArg]) : callback
 
