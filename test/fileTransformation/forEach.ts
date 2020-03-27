@@ -11,3 +11,5 @@ arr.forEach(function(this: number, n) {
 arr.forEach((v, i, a) => {
   console.log(v, i, a[i + 1])
 })
+
+arr.forEach(console.log)

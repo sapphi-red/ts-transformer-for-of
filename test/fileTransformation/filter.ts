@@ -10,3 +10,11 @@ const arr3 = arr.filter(
 )
 
 const arr4 = arr.filter((v, i, a) => v % 5 === 0 || (i % 3 === 0 && a[i + 1] % 2 === 0))
+
+const f = (v: number): boolean => (v - 2) % 3 === 0
+const arr5 = arr.filter(f)
+
+const f2 = function(this: number, v: number): boolean {
+  return ((v - 2) % 3) + this === 0
+}
+const arr6 = arr.filter(f2, 200)

@@ -1,5 +1,5 @@
 "use strict";
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 var arr = Array.from({ length: 1000 }, function (v, i) { return i; });
 (function (_b) {
     var _a = function (n) {
@@ -26,5 +26,12 @@ var arr = Array.from({ length: 1000 }, function (v, i) { return i; });
     for (var _i = 0; _i < _h.length; _i++) {
         var _j = _h[_i];
         _g(_j, _i, _h);
+    }
+})(arr);
+(function (_l) {
+    var _k = console.log;
+    for (var _i = 0; _i < _l.length; _i++) {
+        var _m = _l[_i];
+        _k(_m, _i, _l);
     }
 })(arr);

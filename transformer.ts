@@ -4,7 +4,8 @@ import {
   isFunction,
   getSimpleArrayMethodExpression,
   MethodCallExpression,
-  isArrayForOfStatement
+  isArrayForOfStatement,
+  isFunctionType
 } from './type'
 import { createFilterTmpFunction, createMapTmpFunction, createForEachTmpFunction, createFor } from './createStatement'
 
@@ -39,7 +40,7 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
 function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined {
   const typeChecker = program.getTypeChecker()
   if (isArrayMethodCallExpression(node, typeChecker)) {
-    return transformArrayMethods(node, context)
+    return transformArrayMethods(node, context, typeChecker)
   }
 
   if (isArrayForOfStatement(node, typeChecker)) {
@@ -63,7 +64,11 @@ const ArrayIterationMethods = [
   'some'
 ]
 
-function transformArrayMethods(node: MethodCallExpression, context: ts.TransformationContext): ts.Expression {
+function transformArrayMethods(
+  node: MethodCallExpression,
+  context: ts.TransformationContext,
+  typeChecker: ts.TypeChecker
+): ts.Expression {
   const expression = getSimpleArrayMethodExpression(node.expression)
 
   const base = expression.expression
@@ -82,7 +87,7 @@ function transformArrayMethods(node: MethodCallExpression, context: ts.Transform
   const args = node.arguments
   const callback = args[0]
   const thisArg = args[1]
-  if (!isFunction(callback)) {
+  if (!isFunction(callback) && !isFunctionType(typeChecker.getTypeAtLocation(callback))) {
     console.log('The first arg is not a function:', methodName)
     return node
   }

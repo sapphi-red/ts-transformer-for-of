@@ -14,7 +14,7 @@ export function isArrayMethodCallExpression(node: ts.Node, typeChecker: ts.TypeC
   const base = propAccess.expression
   const baseType = typeChecker.getTypeAtLocation(base)
 
-  return isArray(baseType, typeChecker)
+  return isArrayType(baseType, typeChecker)
 }
 
 export function getSimpleArrayMethodExpression(expression: ts.PropertyAccessExpression): ts.PropertyAccessExpression {
@@ -24,7 +24,7 @@ export function getSimpleArrayMethodExpression(expression: ts.PropertyAccessExpr
   return expression
 }
 
-function isArray(type: ts.Type, typeChecker: ts.TypeChecker): type is ts.TypeReference {
+function isArrayType(type: ts.Type, typeChecker: ts.TypeChecker): boolean {
   if (type.getSymbol()?.getName() !== 'Array') {
     return false
   }
@@ -38,6 +38,14 @@ export function isFunction(expression: ts.Expression): expression is ts.Function
   return ts.isArrowFunction(expression) || ts.isFunctionExpression(expression)
 }
 
+export function isFunctionType(type: ts.Type): boolean {
+  if (type.getConstructSignatures().length !== 0 || type.getCallSignatures().length !== 0) {
+    return true
+  }
+  const symbol = type.getSymbol()
+  return symbol !== undefined && symbol.getName() === 'Function'
+}
+
 export function isArrayForOfStatement(node: ts.Node, typeChecker: ts.TypeChecker): node is ts.ForOfStatement {
   if (!ts.isForOfStatement(node)) return false
   // for await of
@@ -46,5 +54,5 @@ export function isArrayForOfStatement(node: ts.Node, typeChecker: ts.TypeChecker
   const arr = node.expression
   const arrType = typeChecker.getTypeAtLocation(arr)
 
-  return isArray(arrType, typeChecker)
+  return isArrayType(arrType, typeChecker)
 }
