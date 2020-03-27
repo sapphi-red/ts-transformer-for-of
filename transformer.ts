@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
-import { isArrayMethodCallExpression, isFunction, getSimpleArrayMethodExpression } from './util';
+import { isArrayMethodCallExpression, isFunction, getSimpleArrayMethodExpression } from './type';
+import { createFilterTmpFunction, createMapTmpFunction, createForEachTmpFunction } from './createStatement';
 
 export default function transformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => visitNodeAndChildren(file, program, context);
@@ -44,75 +45,18 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
 
   const { hoistVariableDeclaration } = context;
 
-  const inputVar = ts.createTempVariable(hoistVariableDeclaration)
-  const callbackFuncVar = ts.createTempVariable(hoistVariableDeclaration)
-  const outputVar = ts.createTempVariable(hoistVariableDeclaration)
-  const nVar = ts.createTempVariable(hoistVariableDeclaration)
-  const inputParam = ts.createParameter([], [], undefined, inputVar)
-
   const bindedCallback = thisArg ? ts.createCall(ts.createPropertyAccess(callback, 'bind'), [], [thisArg]) : callback
 
   let tmpFunction
   if (methodName === 'filter') {
-    tmpFunction = createFilterTmpFunction({inputVar, callbackFuncVar, outputVar, nVar, inputParam}, bindedCallback)
+    tmpFunction = createFilterTmpFunction(hoistVariableDeclaration, bindedCallback)
   } else if (methodName === 'map') {
-    tmpFunction = createMapTmpFunction({inputVar, callbackFuncVar, outputVar, nVar, inputParam}, bindedCallback)
+    tmpFunction = createMapTmpFunction(hoistVariableDeclaration, bindedCallback)
   } else if (methodName === 'forEach') {
-    tmpFunction = createForEachTmpFunction({inputVar, callbackFuncVar, outputVar, nVar, inputParam}, bindedCallback)
+    tmpFunction = createForEachTmpFunction(hoistVariableDeclaration, bindedCallback)
   } else {
     throw new Error(`Transform Error: unsupported method was going to be transformed: ${methodName}`)
   }
 
   return ts.updateCall(node, tmpFunction, [], [base])
-}
-
-interface TmpFunctionVars {
-  inputVar: ts.Identifier
-  callbackFuncVar: ts.Identifier
-  outputVar: ts.Identifier
-  nVar: ts.Identifier
-  inputParam: ts.ParameterDeclaration
-}
-type CreateTmpFunction = (vars: TmpFunctionVars, bindedCallback: ts.Expression) => ts.FunctionExpression
-
-const createFilterTmpFunction: CreateTmpFunction = ({
-  inputVar, callbackFuncVar, outputVar, nVar, inputParam
-}, bindedCallback: ts.Expression) => {
-  return ts.createFunctionExpression([], undefined, undefined, [], [inputParam], undefined, ts.createBlock([
-    ts.createVariableStatement([], [ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
-    ts.createVariableStatement([], [ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
-    ts.createForOf(undefined, nVar, inputVar, ts.createBlock([
-      ts.createIf(ts.createLogicalNot(ts.createCall(callbackFuncVar, [], [nVar])), ts.createContinue()),
-      ts.createExpressionStatement(ts.createCall(ts.createPropertyAccess(outputVar, 'push'), [], [nVar]))
-    ], true)),
-    ts.createReturn(outputVar)
-  ], true))
-}
-
-const createMapTmpFunction: CreateTmpFunction = ({
-  inputVar, callbackFuncVar, outputVar, nVar, inputParam
-}, bindedCallback) => {
-  return ts.createFunctionExpression([], undefined, undefined, [], [inputParam], undefined, ts.createBlock([
-    ts.createVariableStatement([], [ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
-    ts.createVariableStatement([], [ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
-    ts.createForOf(undefined, nVar, inputVar, ts.createBlock([
-      ts.createExpressionStatement(ts.createCall(
-        ts.createPropertyAccess(outputVar, 'push'),
-        [],
-        [ts.createCall(callbackFuncVar, [], [nVar])]
-      ))
-    ], true)),
-    ts.createReturn(outputVar)
-  ], true))
-}
-
-const createForEachTmpFunction: CreateTmpFunction = ({
-  inputVar, callbackFuncVar, nVar, inputParam
-}, bindedCallback) => {
-  return ts.createFunctionExpression([], undefined, undefined, [], [inputParam], undefined, ts.createBlock([
-    ts.createVariableStatement([], [ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
-    ts.createForOf(undefined, nVar, inputVar, ts.createBlock([
-      ts.createExpressionStatement(ts.createCall(callbackFuncVar, [], [nVar]))
-    ], true))
-  ], true))
 }
