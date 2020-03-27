@@ -5,3 +5,5 @@ const arr2 = arr.map(n => n * n)
 const arr3 = arr.map(function(this: number, n) {
   return n * n * this
 }, 2)
+
+const arr4 = arr.map((v, i, a) => v * i * a.length)

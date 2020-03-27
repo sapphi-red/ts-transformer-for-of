@@ -8,3 +8,5 @@ const arr3 = arr.filter(
   },
   { content: 'this is this' }
 )
+
+const arr4 = arr.filter((v, i, a) => v % 5 === 0 || (i % 3 === 0 && a[i + 1] % 2 === 0))

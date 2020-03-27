@@ -68,10 +68,6 @@ function transformArrayMethods(node: MethodCallExpression, context: ts.Transform
     console.log('The first arg is not a function:', methodName)
     return node
   }
-  if (callback.parameters.filter(p => p.name.getText() !== 'this').length > 1) {
-    console.log('Using index param and array param is not supported. Param length:', callback.parameters.length)
-    return node
-  }
 
   const { hoistVariableDeclaration } = context
 

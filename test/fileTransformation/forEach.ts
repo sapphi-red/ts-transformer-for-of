@@ -7,3 +7,7 @@ arr.forEach(n => {
 arr.forEach(function(this: number, n) {
   console.log(n + this)
 }, 2)
+
+arr.forEach((v, i, a) => {
+  console.log(v, i, a[i + 1])
+})
