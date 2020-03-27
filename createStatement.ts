@@ -1,5 +1,7 @@
 import * as ts from 'typescript';
 
+const createConst = (declarations: ts.VariableDeclaration[]): ts.VariableStatement => ts.createVariableStatement(undefined, ts.createVariableDeclarationList(declarations, ts.NodeFlags.Const))
+
 type HoistVariableDeclaration = (node: ts.Identifier) => void
 
 export const wrapWithFunc = (hoistVariableDeclaration: HoistVariableDeclaration, getStatements: (inputVar: ts.Identifier) => ts.Statement[]) => {
@@ -21,8 +23,8 @@ export const createFilterTmpFunction: CreateTmpFunction = (hoistVariableDeclarat
   const callbackFuncVar = ts.createTempVariable(hoistVariableDeclaration)
   const outputVar = ts.createTempVariable(hoistVariableDeclaration)
   return wrapWithFunc(hoistVariableDeclaration, inputVar => [
-    ts.createVariableStatement([], [ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
-    ts.createVariableStatement([], [ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
+    createConst([ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
+    createConst([ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
     createForOf(hoistVariableDeclaration, inputVar, nVar => [
       ts.createIf(ts.createLogicalNot(ts.createCall(callbackFuncVar, [], [nVar])), ts.createContinue()),
       ts.createExpressionStatement(ts.createCall(ts.createPropertyAccess(outputVar, 'push'), [], [nVar]))
@@ -35,8 +37,8 @@ export const createMapTmpFunction: CreateTmpFunction = (hoistVariableDeclaration
   const callbackFuncVar = ts.createTempVariable(hoistVariableDeclaration)
   const outputVar = ts.createTempVariable(hoistVariableDeclaration)
   return wrapWithFunc(hoistVariableDeclaration, inputVar => [
-    ts.createVariableStatement([], [ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
-    ts.createVariableStatement([], [ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
+    createConst([ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
+    createConst([ts.createVariableDeclaration(outputVar, undefined, ts.createArrayLiteral())]),
     createForOf(hoistVariableDeclaration, inputVar, nVar => [
       ts.createExpressionStatement(ts.createCall(
         ts.createPropertyAccess(outputVar, 'push'),
@@ -51,7 +53,7 @@ export const createMapTmpFunction: CreateTmpFunction = (hoistVariableDeclaration
 export const createForEachTmpFunction: CreateTmpFunction = (hoistVariableDeclaration, bindedCallback) => {
   const callbackFuncVar = ts.createTempVariable(hoistVariableDeclaration)
   return wrapWithFunc(hoistVariableDeclaration, inputVar => [
-    ts.createVariableStatement([], [ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
+    createConst([ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
     createForOf(hoistVariableDeclaration, inputVar, nVar => [
       ts.createExpressionStatement(ts.createCall(callbackFuncVar, [], [nVar]))
     ])
