@@ -49,12 +49,30 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   return node
 }
 
+const ArrayIterationMethods = [
+  'every',
+  'fill',
+  'filter',
+  'find',
+  'findIndex',
+  'flatMap',
+  'forEach',
+  'map',
+  'reduce',
+  'reduceRight',
+  'some'
+]
+
 function transformArrayMethods(node: MethodCallExpression, context: ts.TransformationContext): ts.Expression {
   const expression = getSimpleArrayMethodExpression(node.expression)
 
   const base = expression.expression
   const method = expression.name
   const methodName = method.getText()
+
+  if (!ArrayIterationMethods.includes(methodName)) {
+    return node
+  }
 
   if (!['filter', 'map', 'forEach'].includes(methodName)) {
     console.log('Array::filter, Array::map and Array::forEach are only supported. Method name:', methodName)
