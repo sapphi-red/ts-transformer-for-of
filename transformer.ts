@@ -1,6 +1,12 @@
 import * as ts from 'typescript'
-import { isArrayMethodCallExpression, isFunction, getSimpleArrayMethodExpression } from './type'
-import { createFilterTmpFunction, createMapTmpFunction, createForEachTmpFunction } from './createStatement'
+import {
+  isArrayMethodCallExpression,
+  isFunction,
+  getSimpleArrayMethodExpression,
+  MethodCallExpression,
+  isArrayForOfStatement
+} from './type'
+import { createFilterTmpFunction, createMapTmpFunction, createForEachTmpFunction, createFor } from './createStatement'
 
 export default function transformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => visitNodeAndChildren(file, program, context)
@@ -32,10 +38,18 @@ function visitNode(node: ts.SourceFile, program: ts.Program, context: ts.Transfo
 function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined
 function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined {
   const typeChecker = program.getTypeChecker()
-  if (!isArrayMethodCallExpression(node, typeChecker)) {
-    return node
+  if (isArrayMethodCallExpression(node, typeChecker)) {
+    return transformArrayMethods(node, context)
   }
 
+  if (isArrayForOfStatement(node, typeChecker)) {
+    return transformForOf(node, context)
+  }
+
+  return node
+}
+
+function transformArrayMethods(node: MethodCallExpression, context: ts.TransformationContext): ts.Expression {
   const expression = getSimpleArrayMethodExpression(node.expression)
 
   const base = expression.expression
@@ -75,4 +89,36 @@ function visitNode(node: ts.Node, program: ts.Program, context: ts.Transformatio
   }
 
   return ts.updateCall(node, tmpFunction, [], [base])
+}
+
+function transformForOf(node: ts.ForOfStatement, context: ts.TransformationContext): ts.Statement {
+  const { hoistVariableDeclaration } = context
+
+  const initializer = node.initializer
+  if (!ts.isVariableDeclarationList(initializer)) {
+    console.log('Ignoring because initializer type is unknown: ', initializer)
+    return node
+  }
+  const nDeclarations = initializer.declarations
+  if (nDeclarations.length !== 1) {
+    console.log('Ignoring because initializer length is unknown: ', nDeclarations)
+    return node
+  }
+  const n = nDeclarations[0]
+  if (!ts.isIdentifier(n.name)) {
+    console.log('Ignoring because name was not identifier: ', n.name)
+    return node
+  }
+
+  const arr = node.expression
+  const statement = node.statement
+
+  let statements: ts.NodeArray<ts.Statement> | ts.Statement[]
+  if (ts.isBlock(statement)) {
+    statements = statement.statements
+  } else {
+    statements = [statement]
+  }
+
+  return createFor(hoistVariableDeclaration, arr, () => statements, n.name)
 }

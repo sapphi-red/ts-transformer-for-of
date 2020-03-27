@@ -1,9 +1,8 @@
 import * as ts from 'typescript'
 
-export function isArrayMethodCallExpression(
-  node: ts.Node,
-  typeChecker: ts.TypeChecker
-): node is ts.CallExpression & { expression: ts.PropertyAccessExpression } {
+export type MethodCallExpression = ts.CallExpression & { expression: ts.PropertyAccessExpression }
+
+export function isArrayMethodCallExpression(node: ts.Node, typeChecker: ts.TypeChecker): node is MethodCallExpression {
   if (!ts.isCallExpression(node)) {
     return false
   }
@@ -37,4 +36,15 @@ function isArray(type: ts.Type, typeChecker: ts.TypeChecker): type is ts.TypeRef
 
 export function isFunction(expression: ts.Expression): expression is ts.FunctionExpression | ts.ArrowFunction {
   return ts.isArrowFunction(expression) || ts.isFunctionExpression(expression)
+}
+
+export function isArrayForOfStatement(node: ts.Node, typeChecker: ts.TypeChecker): node is ts.ForOfStatement {
+  if (!ts.isForOfStatement(node)) return false
+  // for await of
+  if (node.awaitModifier !== undefined) return false
+
+  const arr = node.expression
+  const arrType = typeChecker.getTypeAtLocation(arr)
+
+  return isArray(arrType, typeChecker)
 }

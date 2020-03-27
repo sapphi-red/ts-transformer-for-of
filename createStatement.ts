@@ -24,11 +24,11 @@ export const wrapWithFunc = (
 
 export const createFor = (
   hoistVariableDeclaration: HoistVariableDeclaration,
-  inputVar: ts.Identifier,
-  getStatements: (nVar: ts.Identifier) => ts.Statement[]
+  inputVar: ts.Expression,
+  getStatements: (nVar: ts.Identifier) => ts.Statement[] | ts.NodeArray<ts.Statement>,
+  nVar: ts.Identifier = ts.createTempVariable(hoistVariableDeclaration)
 ): ts.ForStatement => {
   const iVar = ts.createLoopVariable()
-  const nVar = ts.createTempVariable(hoistVariableDeclaration)
   return ts.createFor(
     ts.createVariableDeclarationList(
       [ts.createVariableDeclaration(iVar, undefined, ts.createLiteral(0))],
