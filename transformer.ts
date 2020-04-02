@@ -139,5 +139,5 @@ function transformForOf(node: ts.ForOfStatement, context: ts.TransformationConte
     statements = [statement]
   }
 
-  return createFor(hoistVariableDeclaration, arr, () => statements, n.name)
+  return createFor(hoistVariableDeclaration, arr, () => statements, false, n.name)
 }

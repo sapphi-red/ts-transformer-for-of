@@ -26,15 +26,26 @@ export const createFor = (
   hoistVariableDeclaration: HoistVariableDeclaration,
   inputVar: ts.Expression,
   getStatements: (nVar: ts.Identifier, iVar: ts.Identifier) => ts.Statement[] | ts.NodeArray<ts.Statement>,
+  cacheLength: boolean = false,
   nVar: ts.Identifier = ts.createTempVariable(hoistVariableDeclaration)
 ): ts.ForStatement => {
   const iVar = ts.createLoopVariable()
+
+  const varDeclarations = [ts.createVariableDeclaration(iVar, undefined, ts.createLiteral(0))]
+  let lessThan = ts.createLessThan(iVar, ts.createPropertyAccess(inputVar, 'length'))
+
+  if (cacheLength) {
+    const lenVar = ts.createTempVariable(hoistVariableDeclaration)
+    varDeclarations.push(ts.createVariableDeclaration(lenVar, undefined, ts.createPropertyAccess(inputVar, 'length')))
+    lessThan = ts.createLessThan(iVar, lenVar)
+  }
+
   return ts.createFor(
     ts.createVariableDeclarationList(
-      [ts.createVariableDeclaration(iVar, undefined, ts.createLiteral(0))],
+      varDeclarations,
       ts.NodeFlags.Let
     ),
-    ts.createLessThan(iVar, ts.createPropertyAccess(inputVar, 'length')),
+    lessThan,
     ts.createPostfixIncrement(iVar),
     ts.createBlock(
       ([
@@ -58,7 +69,7 @@ export const createFilterTmpFunction: CreateTmpFunction = (hoistVariableDeclarat
     createFor(hoistVariableDeclaration, inputVar, (nVar, iVar) => [
       ts.createIf(ts.createLogicalNot(ts.createCall(callbackFuncVar, [], [nVar, iVar, inputVar])), ts.createContinue()),
       ts.createExpressionStatement(ts.createCall(ts.createPropertyAccess(outputVar, 'push'), [], [nVar]))
-    ]),
+    ], true),
     ts.createReturn(outputVar)
   ])
 }
@@ -73,7 +84,7 @@ export const createMapTmpFunction: CreateTmpFunction = (hoistVariableDeclaration
       ts.createExpressionStatement(
         ts.createCall(ts.createPropertyAccess(outputVar, 'push'), [], [ts.createCall(callbackFuncVar, [], [nVar, iVar, inputVar])])
       )
-    ]),
+    ], true),
     ts.createReturn(outputVar)
   ])
 }
@@ -84,6 +95,6 @@ export const createForEachTmpFunction: CreateTmpFunction = (hoistVariableDeclara
     createConst([ts.createVariableDeclaration(callbackFuncVar, undefined, bindedCallback)]),
     createFor(hoistVariableDeclaration, inputVar, (nVar, iVar) => [
       ts.createExpressionStatement(ts.createCall(callbackFuncVar, [], [nVar, iVar, inputVar]))
-    ])
+    ], true)
   ])
 }
