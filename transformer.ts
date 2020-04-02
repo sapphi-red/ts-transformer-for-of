@@ -92,17 +92,15 @@ function transformArrayMethods(
     return node
   }
 
-  const { hoistVariableDeclaration } = context
-
   const bindedCallback = thisArg ? ts.createCall(ts.createPropertyAccess(callback, 'bind'), [], [thisArg]) : callback
 
   let tmpFunction
   if (methodName === 'filter') {
-    tmpFunction = createFilterTmpFunction(hoistVariableDeclaration, bindedCallback)
+    tmpFunction = createFilterTmpFunction(bindedCallback)
   } else if (methodName === 'map') {
-    tmpFunction = createMapTmpFunction(hoistVariableDeclaration, bindedCallback)
+    tmpFunction = createMapTmpFunction(bindedCallback)
   } else if (methodName === 'forEach') {
-    tmpFunction = createForEachTmpFunction(hoistVariableDeclaration, bindedCallback)
+    tmpFunction = createForEachTmpFunction(bindedCallback)
   } else {
     throw new Error(`Transform Error: unsupported method was going to be transformed: ${methodName}`)
   }
@@ -111,8 +109,6 @@ function transformArrayMethods(
 }
 
 function transformForOf(node: ts.ForOfStatement, context: ts.TransformationContext): ts.Statement {
-  const { hoistVariableDeclaration } = context
-
   const initializer = node.initializer
   if (!ts.isVariableDeclarationList(initializer)) {
     console.log('Ignoring because initializer type is unknown: ', initializer)
@@ -139,5 +135,5 @@ function transformForOf(node: ts.ForOfStatement, context: ts.TransformationConte
     statements = [statement]
   }
 
-  return createFor(hoistVariableDeclaration, arr, () => statements, false, n.name)
+  return createFor(arr, () => statements, false, n.name)
 }
