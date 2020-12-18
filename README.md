@@ -10,12 +10,12 @@ npm install --save-dev @sapphi-red/ts-transformer-for-of
 # How to use the custom transformer
 ### ttypescript
 Install ttypescript and use `ttsc` like how you use `tsc`
-```
+```shell
 npm install --save-dev ttypescript
 ```
 
 In tsconfig.json:
-```json
+```jsonc
 {
   "compilerOptions": {
     // ...
