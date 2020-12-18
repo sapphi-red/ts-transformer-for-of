@@ -23,7 +23,7 @@ In tsconfig.json:
       {
       	"transform": "@sapphi-red/ts-transformer-for-of",
       	"cacheLength": false  // cache the length of the array in `for-of` transformations. Defaults to false.,
-        "exclusions": [] // exclude the transformations. The values of the array can be among: 'Array.for-of', 'Array.forEach', 'Array.map', 'Array.filter'
+        "exclusions": [] // exclude the transformations. The values of the array can be among: 'Array-for-of', 'Array-forEach', 'Array-map', 'Array-filter'
       }
     ]
   },

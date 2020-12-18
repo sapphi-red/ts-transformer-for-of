@@ -84,7 +84,7 @@ function transformArrayMethods(
   const method = expression.name
   const methodName = method.getText()
 
-  if (opts.exclusions?.includes(`Array.${methodName}`) || !ArrayIterationMethods.includes(methodName)) {
+  if (opts.exclusions?.includes(`Array-${methodName}`) || !ArrayIterationMethods.includes(methodName)) {
     return node
   }
 
@@ -119,10 +119,10 @@ function transformArrayMethods(
 
 function transformForOf(node: ts.ForOfStatement, context: ts.TransformationContext, opts: TransformerOptions): ts.Statement {
 
-  if (opts.exclusions?.includes('Array.for-of')) {
+  if (opts.exclusions?.includes('Array-for-of')) {
     return node
   }
-  
+
   const initializer = node.initializer
 
   if (!ts.isVariableDeclarationList(initializer)) {
