@@ -108,5 +108,6 @@ dist
 !/index.js
 !test/fileTransformation/*.ES5.js
 !test/fileTransformation/*.ESNext.js
+!test/fileTransformation/*.Excluded.js
 !test/compile/index.js
 /memo.txt

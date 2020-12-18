@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 import * as path from 'path'
 import * as fs from 'fs'
-import { compile, compileCached } from './compile/compile'
+import { compile, compileCached, compileExcluded, compileUnwrapped } from './compile/compile'
 import * as ts from 'typescript'
 
 describe('transforms', () => {
@@ -11,25 +11,35 @@ describe('transforms', () => {
       return path.extname(file) === '.ts'
     })
     .forEach(file =>
-      (['ES5', 'ESNext'] as const).forEach(target =>
+      (['ES5', 'ESNext', 'Excluded'] as const).forEach(target =>
         it(`should transform ${file} as expected when target is ${target}`, async () => {
           let result = ''
           const fullFileName = path.join(fileTransformationDir, file),
             postCompileFullFileName = fullFileName.replace(/\.ts$/, '.js')
 
-          if ( path.basename(file) !== 'forOf-lengthCached.ts' ) {
-            compile(
-              [fullFileName],
-              ts.ScriptTarget[target],
-              (fileName, data) => postCompileFullFileName === path.join(fileName) && (result = data)
-            )
+            if (target !== 'Excluded') {
+              if ( path.basename(file) !== 'forOf-lengthCached.ts' ) {
+                compile(
+                  [fullFileName],
+                  ts.ScriptTarget[target],
+                  (fileName, data) => postCompileFullFileName === path.join(fileName) && (result = data)
+                )
+              } else {
+                // forOf-lengthCached
+                compileCached(
+                  [fullFileName],
+                  ts.ScriptTarget[target],
+                  (fileName, data) => postCompileFullFileName === path.join(fileName) && (result = data)
+                )
+              }
           } else {
-            // forOf-lengthCached
-            compileCached(
+            // check exclusions
+            compileUnwrapped(
               [fullFileName],
-              ts.ScriptTarget[target],
+              ts.ScriptTarget['ESNext'],
               (fileName, data) => postCompileFullFileName === path.join(fileName) && (result = data)
             )
+            console.log(result)
           }
 
           assert.strictEqual(
