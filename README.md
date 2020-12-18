@@ -1,7 +1,7 @@
 # ts-transformer-for-of
 A TypeScript custom transformer to transform `for-of` and array methods like `filter`, `map`, `forEach` to a normal `for` loop.
 
-For now, `Array::filter`, `Array::map` and `Array::forEach` are only supported.
+This transformation results in a higher performance. See [here](https://github.com/aminya/typescript-optimization) for benchmarks.
 
 ```shell
 npm install --save-dev @sapphi-red/ts-transformer-for-of
