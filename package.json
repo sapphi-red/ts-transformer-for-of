@@ -1,7 +1,7 @@
 {
   "name": "@sapphi-red/ts-transformer-for-of",
   "version": "0.6.1",
-  "description": "A TypeScript custom transformer which transforms multiple array methods to one for-of loop.",
+  "description": "A TypeScript custom transformer to transform `for-of` and array methods like `filter`, `map`, `forEach` to a normal `for` loop.",
   "main": "transformer.js",
   "scripts": {
     "prepare": "tsc",

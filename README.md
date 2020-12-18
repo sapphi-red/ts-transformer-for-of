@@ -1,16 +1,37 @@
 # ts-transformer-for-of
-A TypeScript custom transformer which transforms multiple array methods to one for loop.
-Also this transforms `for-of` to a traditional `for` loop.
+A TypeScript custom transformer to transform `for-of` and array methods like `filter`, `map`, `forEach` to a normal `for` loop.
 
-For now, `Array::filter`, `Array::map` and `Array::forEach` are only supported.
+This transformation results in a higher performance. See [here](https://github.com/aminya/typescript-optimization) for benchmarks.
+
+```shell
+npm install --save-dev @sapphi-red/ts-transformer-for-of
+```
 
 # How to use the custom transformer
+### ttypescript
+Install ttypescript and use `ttsc` like how you use `tsc`
+```
+npm install --save-dev ttypescript
+```
 
-Unfortunately, TypeScript itself does not currently provide any easy way to use custom transformers (See [Microsoft/TypeScript#14419](https://github.com/Microsoft/TypeScript/issues/14419)).
-The followings are the example usage of the custom transformer.
+In tsconfig.json:
+```json
+{
+  "compilerOptions": {
+    // ...
+    "plugins": [
+      { "transform": "@sapphi-red/ts-transformer-for-of" }
+    ]
+  },
+  // ...
+}
+```
 
-See [kimamula/ts-transformer-keys](https://github.com/kimamula/ts-transformer-keys/blob/master/README.md#how-to-use-the-custom-transformer).  
-You can use this as it.
+See [examples/ttypescript](examples/ttypescript) for detail.
+See [ttypescript's README](https://github.com/cevek/ttypescript/blob/master/README.md) for how to use this with module bundlers such as webpack or Rollup.
+
+### other methods
+See [kimamula/ts-transformer-keys](https://github.com/kimamula/ts-transformer-keys/blob/master/README.md#how-to-use-the-custom-transformer) for other methods.
 
 # Caveats
 ## Sparse arrays are not supported
