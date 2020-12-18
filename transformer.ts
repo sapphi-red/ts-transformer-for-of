@@ -9,42 +9,49 @@ import {
 } from './type'
 import { createFilterTmpFunction, createMapTmpFunction, createForEachTmpFunction, createFor } from './createStatement'
 
-export default function transformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile> {
-  return (context: ts.TransformationContext) => (file: ts.SourceFile) => visitNodeAndChildren(file, program, context)
+export default function transformer(program: ts.Program, opts: TransformerOptions = {}): ts.TransformerFactory<ts.SourceFile> {
+  return (context: ts.TransformationContext) => (file: ts.SourceFile) => visitNodeAndChildren(file, program, context, opts)
+}
+
+export interface TransformerOptions {
+  cacheLength?: boolean
 }
 
 function visitNodeAndChildren(
   node: ts.SourceFile,
   program: ts.Program,
-  context: ts.TransformationContext
+  context: ts.TransformationContext,
+  opts: TransformerOptions
 ): ts.SourceFile
 function visitNodeAndChildren(
   node: ts.Node,
   program: ts.Program,
-  context: ts.TransformationContext
+  context: ts.TransformationContext,
+  opts: TransformerOptions
 ): ts.Node | undefined
 function visitNodeAndChildren(
   node: ts.Node,
   program: ts.Program,
-  context: ts.TransformationContext
+  context: ts.TransformationContext,
+  opts: TransformerOptions
 ): ts.Node | undefined {
   return ts.visitEachChild(
-    visitNode(node, program, context),
-    childNode => visitNodeAndChildren(childNode, program, context),
+    visitNode(node, program, context, opts),
+    childNode => visitNodeAndChildren(childNode, program, context, opts),
     context
   )
 }
 
-function visitNode(node: ts.SourceFile, program: ts.Program, context: ts.TransformationContext): ts.SourceFile
-function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined
-function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext): ts.Node | undefined {
+function visitNode(node: ts.SourceFile, program: ts.Program, context: ts.TransformationContext, opts: TransformerOptions): ts.SourceFile
+function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext, opts: TransformerOptions): ts.Node | undefined
+function visitNode(node: ts.Node, program: ts.Program, context: ts.TransformationContext, opts: TransformerOptions): ts.Node | undefined {
   const typeChecker = program.getTypeChecker()
   if (isArrayMethodCallExpression(node, typeChecker)) {
-    return transformArrayMethods(node, context, typeChecker)
+    return transformArrayMethods(node, context, typeChecker, opts)
   }
 
   if (isArrayForOfStatement(node, typeChecker)) {
-    return transformForOf(node, context)
+    return transformForOf(node, context, opts)
   }
 
   return node
@@ -67,7 +74,8 @@ const ArrayIterationMethods = [
 function transformArrayMethods(
   node: MethodCallExpression,
   context: ts.TransformationContext,
-  typeChecker: ts.TypeChecker
+  typeChecker: ts.TypeChecker,
+  opts: TransformerOptions
 ): ts.Expression {
   const expression = getSimpleArrayMethodExpression(node.expression)
 
@@ -108,7 +116,7 @@ function transformArrayMethods(
   return ts.updateCall(node, tmpFunction, [], [base])
 }
 
-function transformForOf(node: ts.ForOfStatement, context: ts.TransformationContext): ts.Statement {
+function transformForOf(node: ts.ForOfStatement, context: ts.TransformationContext, opts: TransformerOptions): ts.Statement {
   const initializer = node.initializer
   if (!ts.isVariableDeclarationList(initializer)) {
     console.log('Ignoring because initializer type is unknown: ', initializer)
@@ -135,5 +143,5 @@ function transformForOf(node: ts.ForOfStatement, context: ts.TransformationConte
     statements = [statement]
   }
 
-  return createFor(arr, () => statements, false, n.name)
+  return createFor(arr, () => statements, opts.cacheLength ?? false, n.name)
 }
