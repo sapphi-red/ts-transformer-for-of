@@ -20,14 +20,13 @@ In tsconfig.json:
   "compilerOptions": {
     // ...
     "plugins": [
-      { "transform": "@sapphi-red/ts-transformer-for-of" }
+      { "transform": "@sapphi-red/ts-transformer-for-of", "cacheLength": false }
     ]
   },
   // ...
 }
 ```
 
-See [examples/ttypescript](examples/ttypescript) for detail.
 See [ttypescript's README](https://github.com/cevek/ttypescript/blob/master/README.md) for how to use this with module bundlers such as webpack or Rollup.
 
 ### other methods
