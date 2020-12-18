@@ -14,6 +14,7 @@ export default function transformer(program: ts.Program, opts: TransformerOption
 }
 
 export interface TransformerOptions {
+  exclusions?: Array<string>
   cacheLength?: boolean
 }
 
@@ -83,7 +84,7 @@ function transformArrayMethods(
   const method = expression.name
   const methodName = method.getText()
 
-  if (!ArrayIterationMethods.includes(methodName)) {
+  if (opts.exclusions?.includes(`Array.${methodName}`) || !ArrayIterationMethods.includes(methodName)) {
     return node
   }
 
@@ -117,7 +118,13 @@ function transformArrayMethods(
 }
 
 function transformForOf(node: ts.ForOfStatement, context: ts.TransformationContext, opts: TransformerOptions): ts.Statement {
+
+  if (opts.exclusions?.includes('Array.for-of')) {
+    return node
+  }
+  
   const initializer = node.initializer
+
   if (!ts.isVariableDeclarationList(initializer)) {
     console.log('Ignoring because initializer type is unknown: ', initializer)
     return node
