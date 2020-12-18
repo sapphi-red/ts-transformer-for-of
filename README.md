@@ -20,7 +20,10 @@ In tsconfig.json:
   "compilerOptions": {
     // ...
     "plugins": [
-      { "transform": "@sapphi-red/ts-transformer-for-of", "cacheLength": false }
+      { 
+      	"transform": "@sapphi-red/ts-transformer-for-of", 
+      	"cacheLength": false  // cache the length of the array in `for-of` transformations. Defaults to false.
+      } 
     ]
   },
   // ...
