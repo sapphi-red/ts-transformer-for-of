@@ -16,6 +16,7 @@ export default function transformer(program: ts.Program, opts: TransformerOption
 export interface TransformerOptions {
   exclusions?: Array<string>
   cacheLength?: boolean
+  wrapWithFunc?: boolean
 }
 
 function visitNodeAndChildren(
@@ -105,11 +106,11 @@ function transformArrayMethods(
 
   let tmpFunction
   if (methodName === 'filter') {
-    tmpFunction = createFilterTmpFunction(bindedCallback)
+    tmpFunction = createFilterTmpFunction(bindedCallback, opts)
   } else if (methodName === 'map') {
-    tmpFunction = createMapTmpFunction(bindedCallback)
+    tmpFunction = createMapTmpFunction(bindedCallback, opts)
   } else if (methodName === 'forEach') {
-    tmpFunction = createForEachTmpFunction(bindedCallback)
+    tmpFunction = createForEachTmpFunction(bindedCallback, opts)
   } else {
     throw new Error(`Transform Error: unsupported method was going to be transformed: ${methodName}`)
   }
@@ -122,7 +123,7 @@ function transformForOf(node: ts.ForOfStatement, context: ts.TransformationConte
   if (opts.exclusions?.includes('Array.for-of')) {
     return node
   }
-  
+
   const initializer = node.initializer
 
   if (!ts.isVariableDeclarationList(initializer)) {

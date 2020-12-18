@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 import * as path from 'path'
 import * as fs from 'fs'
-import { compile, compileCached, compileExcluded } from './compile/compile'
+import { compile, compileCached, compileExcluded, compileUnwrapped } from './compile/compile'
 import * as ts from 'typescript'
 
 describe('transforms', () => {
@@ -34,11 +34,12 @@ describe('transforms', () => {
               }
           } else {
             // check exclusions
-            compileExcluded(
+            compileUnwrapped(
               [fullFileName],
               ts.ScriptTarget['ESNext'],
               (fileName, data) => postCompileFullFileName === path.join(fileName) && (result = data)
             )
+            console.log(result)
           }
 
           assert.strictEqual(
