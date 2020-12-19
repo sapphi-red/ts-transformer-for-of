@@ -12,7 +12,8 @@ const _compile = (
         strict: true,
         noEmitOnError: true,
         suppressImplicitAnyIndexErrors: true,
-        target
+        target,
+        module: ts.ModuleKind.CommonJS
       })
       const transformers: ts.CustomTransformers = transformer
         ? {
