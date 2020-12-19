@@ -30,3 +30,4 @@ const _compile = (
 export const compile = _compile(transformer)
 export const compileRaw = _compile()
 export const compileCached = _compile(transformer, { cacheLength: true })
+export const compileExcluded = _compile(transformer, { exclusions: ['Array-for-of', 'Array-forEach', 'Array-map', 'Array-filter'] })
